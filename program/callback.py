@@ -16,12 +16,12 @@ from config import (
 @Client.on_callback_query(filters.regex("cbstart"))
 async def cbstart(_, query: CallbackQuery):
     await query.edit_message_text(
-        f"""✨ **Welcome [{query.message.chat.first_name}](tg://user?id={query.message.chat.id}) !**\n
-💭 **[{BOT_NAME}](https://t.me/{BOT_USERNAME}) allows you to play music and video on groups through the new Telegram's video chats!**
+        f"""🙏 **Welcome [{query.message.chat.first_name}](tg://user?id={query.message.chat.id}) !**\n
+🔵 **[{BOT_NAME}](https://t.me/{BOT_USERNAME}) allows you to play music and video on groups through the new Telegram's video chats!**
 
-💡 **Find out all the Bot's commands and how they work by clicking on the » 📚 Commands button!**
+🔴 **Find out all the Bot's commands and how they work by clicking on the » 🎶 Commands button!**
 
-🔖 **To know how to use this bot, please click on the » ❓ Basic Guide button!**""",
+⚪ **To know how to use this bot, please click on the » 🎛️ Basic Guide button!**""",
         reply_markup=InlineKeyboardMarkup(
             [
                 [
@@ -30,23 +30,17 @@ async def cbstart(_, query: CallbackQuery):
                         url=f"https://t.me/{BOT_USERNAME}?startgroup=true",
                     )
                 ],
-                [InlineKeyboardButton("❓ Basic Guide", callback_data="cbhowtouse")],
-                [
-                    InlineKeyboardButton("📚 Commands", callback_data="cbcmds"),
-                    InlineKeyboardButton("❤ Donate", url=f"https://t.me/{OWNER_NAME}"),
+                [InlineKeyboardButton("🎛️Basic Guide🎛️", callback_data="cbhowtouse"),
+     
+                    InlineKeyboardButton("🎶Commands🎶", callback_data="cbcmds"),
                 ],
                 [
                     InlineKeyboardButton(
-                        "👥 Official Group", url=f"https://t.me/{GROUP_SUPPORT}"
+                        "👥Official Group👥", url=f"https://t.me/{GROUP_SUPPORT}"
                     ),
                     InlineKeyboardButton(
-                        "📣 Official Channel", url=f"https://t.me/{UPDATES_CHANNEL}"
+                        "🌐Official Channel🌐", url=f"https://t.me/{UPDATES_CHANNEL}"
                     ),
-                ],
-                [
-                    InlineKeyboardButton(
-                        "🌐 Source Code", url="https://github.com/levina-lab/video-stream"
-                    )
                 ],
             ]
         ),
@@ -70,7 +64,7 @@ async def cbguides(_, query: CallbackQuery):
 
 💡 **If you have a follow-up questions about this bot, you can tell it on my support chat here: @{GROUP_SUPPORT}**
 
-⚡ __Powered by {BOT_NAME} A.I__""",
+⚡ __Powered by {BOT_NAME} __""",
         reply_markup=InlineKeyboardMarkup(
             [[InlineKeyboardButton("🔙 Go Back", callback_data="cbstart")]]
         ),
@@ -80,18 +74,18 @@ async def cbguides(_, query: CallbackQuery):
 @Client.on_callback_query(filters.regex("cbcmds"))
 async def cbcmds(_, query: CallbackQuery):
     await query.edit_message_text(
-        f"""✨ **Hello [{query.message.chat.first_name}](tg://user?id={query.message.chat.id}) !**
+        f"""🎛️ **Hello [{query.message.chat.first_name}](tg://user?id={query.message.chat.id}) !**
 
 » **press the button below to read the explanation and see the list of available commands !**
 
-⚡ __Powered by {BOT_NAME} A.I__""",
+🧿 __Powered by {BOT_NAME} __""",
         reply_markup=InlineKeyboardMarkup(
             [
                 [
-                    InlineKeyboardButton("👷🏻 Admin Cmd", callback_data="cbadmin"),
-                    InlineKeyboardButton("🧙🏻 Sudo Cmd", callback_data="cbsudo"),
+                    InlineKeyboardButton("👷🏻 Admin Cmd👷", callback_data="cbadmin"),
+                    InlineKeyboardButton("🧙🏻 Sudo Cmd 🧙", callback_data="cbsudo"),
                 ],[
-                    InlineKeyboardButton("📚 Basic Cmd", callback_data="cbbasic")
+                    InlineKeyboardButton("📚 Basic Cmd 📚", callback_data="cbbasic")
                 ],[
                     InlineKeyboardButton("🔙 Go Back", callback_data="cbstart")
                 ],
@@ -106,6 +100,7 @@ async def cbbasic(_, query: CallbackQuery):
         f"""🏮 here is the basic commands:
 
 » /play (song name/link) - play music on video chat
+» /stream - play live music from radio yt live/m3u8
 » /vplay (video name/link) - play video on video chat
 » /vstream - play live video from yt live/m3u8
 » /playlist - show you the playlist
