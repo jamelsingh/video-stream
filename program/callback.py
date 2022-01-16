@@ -99,7 +99,7 @@ async def cbbasic(_, query: CallbackQuery):
     await query.edit_message_text(
         f"""🏮 here is the basic commands:
 
-» /play (song name/link) - play music on video chat
+» /mplay (song name/link) - play music on video chat
 » /stream - play live music from radio yt live/m3u8
 » /vplay (video name/link) - play video on video chat
 » /vstream - play live video from yt live/m3u8
