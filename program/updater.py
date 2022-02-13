@@ -58,8 +58,7 @@ def updater():
 async def update_repo(_, message: Message):
     chat_id = message.chat.id
     msg = await message.reply("🔄 `processing update...`")
-    update_avail = updater()
-    if update_avail:
+    if update_avail := updater():
         await msg.edit("✅ update finished\n\n• bot restarted, back active again in 1 minutes.")
         system("git pull -f && pip3 install -r requirements.txt")
         execle(sys.executable, sys.executable, "main.py", environ)
