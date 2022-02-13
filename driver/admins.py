@@ -3,17 +3,15 @@ from pyrogram.types import Chat
 from cache.admins import get as gett, set
 
 async def get_administrators(chat: Chat) -> List[int]:
-    get = gett(chat.id)
-
-    if get:
+    if get := gett(chat.id):
         return get
-    else:
-        administrators = await chat.get_members(filter="administrators")
-        to_set = []
+    administrators = await chat.get_members(filter="administrators")
+    to_set = [
+        administrator.user.id
+        for administrator in administrators
+        if administrator.can_manage_voice_chats
+    ]
 
-        for administrator in administrators:
-            if administrator.can_manage_voice_chats:
-                to_set.append(administrator.user.id)
 
-        set(chat.id, to_set)
-        return await get_administrators(chat)
+    set(chat.id, to_set)
+    return await get_administrators(chat)

@@ -78,8 +78,9 @@ async def vplay(c: Client, m: Message):
     a = await c.get_chat_member(chat_id, aing.id)
     if a.status != "administrator":
         await m.reply_text(
-            f"💡 To use me, I need to be an **Administrator** with the following **permissions**:\n\n» ❌ __Delete messages__\n» ❌ __Invite users__\n» ❌ __Manage video chat__\n\nOnce done, type /reload"
+            '💡 To use me, I need to be an **Administrator** with the following **permissions**:\n\n» ❌ __Delete messages__\n» ❌ __Invite users__\n» ❌ __Manage video chat__\n\nOnce done, type /reload'
         )
+
         return
     if not a.can_manage_voice_chats:
         await m.reply_text(
@@ -123,187 +124,124 @@ async def vplay(c: Client, m: Message):
                 f"❌ **userbot failed to join**\n\n**reason**: `{e}`"
             )
 
-    if replied:
-        if replied.video or replied.document:
-            loser = await replied.reply("📥 **downloading video...**")
-            dl = await replied.download()
-            link = replied.link
-            if len(m.command) < 2:
-                Q = 720
-            else:
-                pq = m.text.split(None, 1)[1]
-                if pq == "720" or "480" or "360":
-                    Q = int(pq)
-                else:
-                    Q = 720
-                    await loser.edit(
-                        "» __only 720, 480, 360 allowed__ \n💡 **now streaming video in 720p**"
-                    )
-            try:
-                if replied.video:
-                    songname = replied.video.file_name[:70]
-                elif replied.document:
-                    songname = replied.document.file_name[:70]
-            except BaseException:
-                songname = "Video"
-
-            if chat_id in QUEUE:
-                pos = add_to_queue(chat_id, songname, dl, link, "Video", Q)
-                await loser.delete()
-                requester = f"[{m.from_user.first_name}](tg://user?id={m.from_user.id})"
-                await m.reply_photo(
-                    photo=f"{IMG_1}",
-                    caption=f"💡 **Track added to queue »** `{pos}`\n\n🏷 **Name:** [{songname}]({link}) | `video`\n💭 **Chat:** `{chat_id}`\n🎧 **Request by:** {requester}",
-                    reply_markup=keyboard,
-                )
-            else:
-                if Q == 720:
-                    amaze = HighQualityVideo()
-                elif Q == 480:
-                    amaze = MediumQualityVideo()
-                elif Q == 360:
-                    amaze = LowQualityVideo()
-                await loser.edit("🔄 **Joining vc...**")
-                await call_py.join_group_call(
-                    chat_id,
-                    AudioVideoPiped(
-                        dl,
-                        HighQualityAudio(),
-                        amaze,
-                    ),
-                    stream_type=StreamType().local_stream,
-                )
-                add_to_queue(chat_id, songname, dl, link, "Video", Q)
-                await loser.delete()
-                requester = f"[{m.from_user.first_name}](tg://user?id={m.from_user.id})"
-                await m.reply_photo(
-                    photo=f"{IMG_2}",
-                    caption=f"🏷 **Name:** [{songname}]({link})\n💭 **Chat:** `{chat_id}`\n💡 **Status:** `Playing`\n🎧 **Request by:** {requester}\n📹 **Stream type:** `Video`",
-                    reply_markup=keyboard,
-                )
+    if (
+        replied
+        and not replied.video
+        and not replied.document
+        and len(m.command) < 2
+        or not replied
+        and len(m.command) < 2
+    ):
+        await m.reply(
+            "» reply to an **video file** or **give something to search.**"
+        )
+    elif replied and not replied.video and not replied.document or not replied:
+        loser = await c.send_message(chat_id, "🔍 **Searching...**")
+        query = m.text.split(None, 1)[1]
+        search = ytsearch(query)
+        Q = 720
+        amaze = HighQualityVideo()
+        if search == 0:
+            await loser.edit("❌ **no results found.**")
         else:
-            if len(m.command) < 2:
-                await m.reply(
-                    "» reply to an **video file** or **give something to search.**"
+            songname = search[0]
+            title = search[0]
+            url = search[1]
+            duration = search[2]
+            thumbnail = search[3]
+            userid = m.from_user.id
+            gcname = m.chat.title
+            ctitle = await CHAT_TITLE(gcname)
+            image = await thumb(thumbnail, title, userid, ctitle)
+            veez, ytlink = await ytdl(url)
+            if veez == 0:
+                await loser.edit(f"❌ yt-dl issues detected\n\n» `{ytlink}`")
+            elif chat_id in QUEUE:
+                pos = add_to_queue(
+                    chat_id, songname, ytlink, url, "Video", Q
+                )
+                await loser.delete()
+                requester = f"[{m.from_user.first_name}](tg://user?id={m.from_user.id})"
+                await m.reply_photo(
+                    photo=image,
+                    caption=f"💡 **Track added to queue »** `{pos}`\n\n🏷 **Name:** [{songname}]({url}) | `video`\n⏱ **Duration:** `{duration}`\n🎧 **Request by:** {requester}",
+                    reply_markup=keyboard,
                 )
             else:
-                loser = await c.send_message(chat_id, "🔍 **Searching...**")
-                query = m.text.split(None, 1)[1]
-                search = ytsearch(query)
-                Q = 720
-                amaze = HighQualityVideo()
-                if search == 0:
-                    await loser.edit("❌ **no results found.**")
-                else:
-                    songname = search[0]
-                    title = search[0]
-                    url = search[1]
-                    duration = search[2]
-                    thumbnail = search[3]
-                    userid = m.from_user.id
-                    gcname = m.chat.title
-                    ctitle = await CHAT_TITLE(gcname)
-                    image = await thumb(thumbnail, title, userid, ctitle)
-                    veez, ytlink = await ytdl(url)
-                    if veez == 0:
-                        await loser.edit(f"❌ yt-dl issues detected\n\n» `{ytlink}`")
-                    else:
-                        if chat_id in QUEUE:
-                            pos = add_to_queue(
-                                chat_id, songname, ytlink, url, "Video", Q
-                            )
-                            await loser.delete()
-                            requester = f"[{m.from_user.first_name}](tg://user?id={m.from_user.id})"
-                            await m.reply_photo(
-                                photo=image,
-                                caption=f"💡 **Track added to queue »** `{pos}`\n\n🏷 **Name:** [{songname}]({url}) | `video`\n⏱ **Duration:** `{duration}`\n🎧 **Request by:** {requester}",
-                                reply_markup=keyboard,
-                            )
-                        else:
-                            try:
-                                await loser.edit("🔄 **Joining vc...**")
-                                await call_py.join_group_call(
-                                    chat_id,
-                                    AudioVideoPiped(
-                                        ytlink,
-                                        HighQualityAudio(),
-                                        amaze,
-                                    ),
-                                    stream_type=StreamType().local_stream,
-                                )
-                                add_to_queue(chat_id, songname, ytlink, url, "Video", Q)
-                                await loser.delete()
-                                requester = f"[{m.from_user.first_name}](tg://user?id={m.from_user.id})"
-                                await m.reply_photo(
-                                    photo=image,
-                                    caption=f"🏷 **Name:** [{songname}]({url})\n⏱ **Duration:** `{duration}`\n💡 **Status:** `Playing`\n🎧 **Request by:** {requester}\n📹 **Stream type:** `Video`",
-                                    reply_markup=keyboard,
-                                )
-                            except Exception as ep:
-                                await loser.delete()
-                                await m.reply_text(f"🚫 error: `{ep}`")
+                try:
+                    await loser.edit("🔄 **Joining vc...**")
+                    await call_py.join_group_call(
+                        chat_id,
+                        AudioVideoPiped(
+                            ytlink,
+                            HighQualityAudio(),
+                            amaze,
+                        ),
+                        stream_type=StreamType().local_stream,
+                    )
+                    add_to_queue(chat_id, songname, ytlink, url, "Video", Q)
+                    await loser.delete()
+                    requester = f"[{m.from_user.first_name}](tg://user?id={m.from_user.id})"
+                    await m.reply_photo(
+                        photo=image,
+                        caption=f"🏷 **Name:** [{songname}]({url})\n⏱ **Duration:** `{duration}`\n💡 **Status:** `Playing`\n🎧 **Request by:** {requester}\n📹 **Stream type:** `Video`",
+                        reply_markup=keyboard,
+                    )
+                except Exception as ep:
+                    await loser.delete()
+                    await m.reply_text(f"🚫 error: `{ep}`")
 
     else:
+        loser = await replied.reply("📥 **downloading video...**")
+        dl = await replied.download()
+        link = replied.link
         if len(m.command) < 2:
-            await m.reply(
-                "» reply to an **video file** or **give something to search.**"
+            Q = 720
+        else:
+            pq = m.text.split(None, 1)[1]
+            Q = int(pq)
+        try:
+            if replied.video:
+                songname = replied.video.file_name[:70]
+            elif replied.document:
+                songname = replied.document.file_name[:70]
+        except BaseException:
+            songname = "Video"
+
+        if chat_id in QUEUE:
+            pos = add_to_queue(chat_id, songname, dl, link, "Video", Q)
+            await loser.delete()
+            requester = f"[{m.from_user.first_name}](tg://user?id={m.from_user.id})"
+            await m.reply_photo(
+                photo=f"{IMG_1}",
+                caption=f"💡 **Track added to queue »** `{pos}`\n\n🏷 **Name:** [{songname}]({link}) | `video`\n💭 **Chat:** `{chat_id}`\n🎧 **Request by:** {requester}",
+                reply_markup=keyboard,
             )
         else:
-            loser = await c.send_message(chat_id, "🔍 **Searching...**")
-            query = m.text.split(None, 1)[1]
-            search = ytsearch(query)
-            Q = 720
-            amaze = HighQualityVideo()
-            if search == 0:
-                await loser.edit("❌ **no results found.**")
-            else:
-                songname = search[0]
-                title = search[0]
-                url = search[1]
-                duration = search[2]
-                thumbnail = search[3]
-                userid = m.from_user.id
-                gcname = m.chat.title
-                ctitle = await CHAT_TITLE(gcname)
-                image = await thumb(thumbnail, title, userid, ctitle)
-                veez, ytlink = await ytdl(url)
-                if veez == 0:
-                    await loser.edit(f"❌ yt-dl issues detected\n\n» `{ytlink}`")
-                else:
-                    if chat_id in QUEUE:
-                        pos = add_to_queue(chat_id, songname, ytlink, url, "Video", Q)
-                        await loser.delete()
-                        requester = (
-                            f"[{m.from_user.first_name}](tg://user?id={m.from_user.id})"
-                        )
-                        await m.reply_photo(
-                            photo=image,
-                            caption=f"💡 **Track added to queue »** `{pos}`\n\n🏷 **Name:** [{songname}]({url}) | `video`\n⏱ **Duration:** `{duration}`\n🎧 **Request by:** {requester}",
-                            reply_markup=keyboard,
-                        )
-                    else:
-                        try:
-                            await loser.edit("🔄 **Joining vc...**")
-                            await call_py.join_group_call(
-                                chat_id,
-                                AudioVideoPiped(
-                                    ytlink,
-                                    HighQualityAudio(),
-                                    amaze,
-                                ),
-                                stream_type=StreamType().local_stream,
-                            )
-                            add_to_queue(chat_id, songname, ytlink, url, "Video", Q)
-                            await loser.delete()
-                            requester = f"[{m.from_user.first_name}](tg://user?id={m.from_user.id})"
-                            await m.reply_photo(
-                                photo=image,
-                                caption=f"🏷 **Name:** [{songname}]({url})\n⏱ **Duration:** `{duration}`\n💡 **Status:** `Playing`\n🎧 **Request by:** {requester}\n📹 **Stream type:** `Video`",
-                                reply_markup=keyboard,
-                            )
-                        except Exception as ep:
-                            await loser.delete()
-                            await m.reply_text(f"🚫 error: `{ep}`")
+            if Q == 360:
+                amaze = LowQualityVideo()
+            elif Q == 480:
+                amaze = MediumQualityVideo()
+            elif Q == 720:
+                amaze = HighQualityVideo()
+            await loser.edit("🔄 **Joining vc...**")
+            await call_py.join_group_call(
+                chat_id,
+                AudioVideoPiped(
+                    dl,
+                    HighQualityAudio(),
+                    amaze,
+                ),
+                stream_type=StreamType().local_stream,
+            )
+            add_to_queue(chat_id, songname, dl, link, "Video", Q)
+            await loser.delete()
+            requester = f"[{m.from_user.first_name}](tg://user?id={m.from_user.id})"
+            await m.reply_photo(
+                photo=f"{IMG_2}",
+                caption=f"🏷 **Name:** [{songname}]({link})\n💭 **Chat:** `{chat_id}`\n💡 **Status:** `Playing`\n🎧 **Request by:** {requester}\n📹 **Stream type:** `Video`",
+                reply_markup=keyboard,
+            )
 
 
 @Client.on_message(command(["vstream", f"vstream@{BOT_USERNAME}"]) & other_filters)

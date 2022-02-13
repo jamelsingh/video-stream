@@ -9,8 +9,7 @@ def changeImageSize(maxWidth, maxHeight, image):
     heightRatio = maxHeight / image.size[1]
     newWidth = int(widthRatio * image.size[0])
     newHeight = int(heightRatio * image.size[1])
-    newImage = image.resize((newWidth, newHeight))
-    return newImage
+    return image.resize((newWidth, newHeight))
 
 
 async def thumb(thumbnail, title, userid, ctitle):
@@ -46,5 +45,4 @@ async def thumb(thumbnail, title, userid, ctitle):
     img.save(f"search/final{userid}.png")
     os.remove(f"search/temp{userid}.png")
     os.remove(f"search/thumb{userid}.png")
-    final = f"search/final{userid}.png"
-    return final
+    return f"search/final{userid}.png"
